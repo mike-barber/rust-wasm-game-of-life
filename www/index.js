@@ -18,7 +18,7 @@ canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext("2d");
 
-const playPauseButton = document.getElementById("play-pause");
+
 
 let animationId = null;
 
@@ -83,6 +83,13 @@ const drawCells = () => {
     ctx.stroke();
 }
 
+/**
+ * Interactions
+ */
+
+const playPauseButton = document.getElementById("btn-play-pause");
+const blankButton = document.getElementById("btn-blank");
+const randomButton = document.getElementById("btn-random");
 
 const isPaused = () => {
     return animationId === null;
@@ -98,6 +105,8 @@ const pause = () => {
     cancelAnimationFrame(animationId);
     animationId = null;
 };
+
+
 
 // hook up the event handler for the button
 playPauseButton.addEventListener("click", _ => {
@@ -122,6 +131,18 @@ canvas.addEventListener("click", event => {
     const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
 
     universe.flip_cell(row,col);
+    drawGrid();
+    drawCells();
+});
+
+blankButton.addEventListener("click", _ => {
+    universe.reset_zero();
+    drawGrid();
+    drawCells();
+});
+
+randomButton.addEventListener("click", _ => {
+    universe.reset_random();
     drawGrid();
     drawCells();
 });

@@ -2,6 +2,7 @@ mod utils;
 
 use std::{fmt::Display, mem::swap};
 
+use js_sys::Math::random;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -44,6 +45,14 @@ impl Cell {
             Cell::Alive => Cell::Dead,
         }
     }
+
+    pub fn random() -> Cell {
+        if js_sys::Math::random() < 0.5 {
+            Cell::Alive
+        } else {
+            Cell::Dead
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -67,15 +76,7 @@ impl Universe {
 
         log!("Creating Universe with dimensions {} x {}", width, height);
 
-        let cells = (0..width * height)
-            .map(|_i| {
-                if js_sys::Math::random() < 0.5 {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
+        let cells = (0..width * height).map(|_i| Cell::random()).collect();
 
         let flip = vec![Cell::Dead; (width * height) as usize];
 
@@ -97,11 +98,21 @@ impl Universe {
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
         self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
+        self.flip = vec![Cell::Dead; (self.width * self.height) as usize];
     }
 
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
         self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
+        self.flip = vec![Cell::Dead; (self.width * self.height) as usize];
+    }
+
+    pub fn reset_random(&mut self) {
+        self.cells.iter_mut().for_each(|v| *v = Cell::random());
+    }
+
+    pub fn reset_zero(&mut self) {
+        self.cells.iter_mut().for_each(|v| *v = Cell::Dead);
     }
 
     pub fn cells(&self) -> *const Cell {
@@ -113,7 +124,7 @@ impl Universe {
     }
 
     pub fn flip_cell(&mut self, row: u32, col: u32) {
-        let idx = self.get_index(row,col);
+        let idx = self.get_index(row, col);
         self.cells[idx].flip();
     }
 
