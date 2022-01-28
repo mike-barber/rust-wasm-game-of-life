@@ -18,13 +18,17 @@ canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext("2d");
 
+const playPauseButton = document.getElementById("play-pause");
+
+let animationId = null;
+
 const renderLoop = () => {
     //debugger; -- useful for a breakpoint
     universe.tick();
 
     drawGrid();
     drawCells();
-    requestAnimationFrame(renderLoop);
+    animationId = requestAnimationFrame(renderLoop);
 }
 
 
@@ -80,7 +84,31 @@ const drawCells = () => {
 }
 
 
+const isPaused = () => {
+    return animationId === null;
+};
+
+const play = () => {
+    playPauseButton.textContent = "⏸";
+    renderLoop();
+};
+
+const pause = () => {
+    playPauseButton.textContent = "▶";
+    cancelAnimationFrame(animationId);
+    animationId = null;
+};
+
+// hook up the event handler
+playPauseButton.addEventListener("click", _ => {
+    if (isPaused()) {
+        play();
+    } else {
+        pause();
+    }
+});
+
 // start
 drawGrid();
 drawCells();
-requestAnimationFrame(renderLoop);
+play();
