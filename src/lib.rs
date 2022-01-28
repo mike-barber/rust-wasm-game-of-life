@@ -22,6 +22,13 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 //     alert(&format!("Hello, {}, from Rust!", who));
 // }
 
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
+
 #[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -40,8 +47,15 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
+        // Configure panic hook (not sure this is the right place, since
+        // it's quite a global thing. It'll do for now.
+        utils::set_panic_hook();
+
+        // create the universe
         let width = 128;
         let height = 128;
+
+        log!("Creating Universe with dimensions {} x {}", width, height);
 
         let cells = (0..width * height)
             .map(|_i| {
@@ -145,14 +159,13 @@ impl Universe {
         &self.cells
     }
 
-    pub fn set_cells(&mut self, cell_addresses: &[(u32,u32)]) {
-        for (r,c) in cell_addresses.iter().cloned() {
-            let ix = self.get_index(r,c);
+    pub fn set_cells(&mut self, cell_addresses: &[(u32, u32)]) {
+        for (r, c) in cell_addresses.iter().cloned() {
+            let ix = self.get_index(r, c);
             self.cells[ix] = Cell::Alive;
         }
     }
 }
-
 
 impl Display for Universe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -172,4 +185,3 @@ impl Display for Universe {
         Ok(())
     }
 }
-
