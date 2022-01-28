@@ -1,6 +1,6 @@
 mod utils;
 
-use std::fmt::Display;
+use std::{fmt::Display, mem::swap};
 
 use wasm_bindgen::prelude::*;
 
@@ -42,6 +42,7 @@ pub struct Universe {
     width: u32,
     height: u32,
     cells: Vec<Cell>,
+    flip: Vec<Cell>,
 }
 
 #[wasm_bindgen]
@@ -59,11 +60,6 @@ impl Universe {
 
         let cells = (0..width * height)
             .map(|_i| {
-                // if i % 2 == 0 || i % 7 == 0 {
-                //     Cell::Alive
-                // } else {
-                //     Cell::Dead
-                // }
                 if js_sys::Math::random() < 0.5 {
                     Cell::Alive
                 } else {
@@ -72,10 +68,13 @@ impl Universe {
             })
             .collect();
 
+        let flip = vec![Cell::Dead; (width * height) as usize];
+
         Universe {
             width,
             height,
             cells,
+            flip,
         }
     }
 
@@ -122,7 +121,7 @@ impl Universe {
 
     pub fn tick(&mut self) {
         // TODO: flip buffers would be more efficient potentially
-        let mut next = self.cells.clone();
+        //let mut next = self.cells.clone();
 
         for row in 0..self.height {
             for col in 0..self.width {
@@ -139,11 +138,12 @@ impl Universe {
                     _ => this_cell,
                 };
 
-                next[ix] = next_cell;
+                self.flip[ix] = next_cell;
             }
         }
 
-        self.cells = next;
+        //self.cells = next;
+        self.cells.copy_from_slice(&self.flip);
     }
 
     // for now, render to a string
