@@ -15,7 +15,7 @@ extern {
 }
 
 #[wasm_bindgen]
-pub fn greet() {
+pub fn greet(who: &str) {
     // exported TO JS so this function can be called
-    alert("Hello, wasm-game-of-life!");
+    alert(&format!("Hello, {}, from Rust!", who));
 }
