@@ -72,6 +72,16 @@ impl Universe {
         self.height
     }
 
+    pub fn set_width(&mut self, width: u32) {
+        self.width = width;
+        self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
+    }
+
+    pub fn set_height(&mut self, height: u32) {
+        self.height = height;
+        self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
+    }
+
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
     }
@@ -128,6 +138,22 @@ impl Universe {
     }
 }
 
+// Note: NOT part of the exposed interface to bindgen, as we only need these
+// for testing purposes.
+impl Universe {
+    pub fn get_cells(&self) -> &[Cell] {
+        &self.cells
+    }
+
+    pub fn set_cells(&mut self, cell_addresses: &[(u32,u32)]) {
+        for (r,c) in cell_addresses.iter().cloned() {
+            let ix = self.get_index(r,c);
+            self.cells[ix] = Cell::Alive;
+        }
+    }
+}
+
+
 impl Display for Universe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for line in self.cells.as_slice().chunks(self.width as usize) {
@@ -147,17 +173,3 @@ impl Display for Universe {
     }
 }
 
-#[cfg(test)]
-mod tests {
-
-    use crate::*;
-
-    #[test]
-    fn iterate_succeeds() {
-        // arrange
-        let mut universe = Universe::new();
-
-        // act & assert
-        universe.tick();
-    }
-}
