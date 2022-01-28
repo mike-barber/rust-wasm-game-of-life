@@ -37,6 +37,15 @@ pub enum Cell {
     Alive = 1,
 }
 
+impl Cell {
+    pub fn flip(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        }
+    }
+}
+
 #[wasm_bindgen]
 pub struct Universe {
     width: u32,
@@ -101,6 +110,11 @@ impl Universe {
 
     fn get_index(&self, row: u32, col: u32) -> usize {
         (row * self.width + col) as usize
+    }
+
+    pub fn flip_cell(&mut self, row: u32, col: u32) {
+        let idx = self.get_index(row,col);
+        self.cells[idx].flip();
     }
 
     fn live_neighbour_count(&self, row: u32, col: u32) -> u8 {

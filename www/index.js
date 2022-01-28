@@ -99,7 +99,7 @@ const pause = () => {
     animationId = null;
 };
 
-// hook up the event handler
+// hook up the event handler for the button
 playPauseButton.addEventListener("click", _ => {
     if (isPaused()) {
         play();
@@ -107,6 +107,25 @@ playPauseButton.addEventListener("click", _ => {
         pause();
     }
 });
+
+// flip cells when the canvas is clicked (and redraw)
+canvas.addEventListener("click", event => {
+    const boundingRect = canvas.getBoundingClientRect();
+
+    const scaleX = canvas.width / boundingRect.width;
+    const scaleY = canvas.height / boundingRect.height;
+
+    const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
+    const canvasTop = (event.clientY - boundingRect.top) * scaleY;
+
+    const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
+    const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
+
+    universe.flip_cell(row,col);
+    drawGrid();
+    drawCells();
+});
+
 
 // start
 drawGrid();
