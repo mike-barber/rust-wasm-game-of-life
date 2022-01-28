@@ -37,6 +37,7 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
+#[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
         let width = 64;
@@ -65,14 +66,14 @@ impl Universe {
 
     fn live_neighbour_count(&self, row: u32, col: u32) -> u8 {
         let mut count = 0;
-        for drow in -1..=1 {
-            for dcol in -1..=1 {
+        for drow in [self.height - 1, 0, 1] {
+            for dcol in [self.width - 1, 0, 1] {
                 if (drow == 0) && (dcol == 0) {
                     continue;
                 }
-                let r = (row as i32 + drow) % self.height as i32;
-                let c = (col as i32 + dcol) % self.width as i32;
-                let ix = self.get_index(r as u32, c as u32);
+                let r = (row + drow) % self.height;
+                let c = (col + dcol) % self.width;
+                let ix = self.get_index(r, c);
                 count += self.cells[ix] as u8;
             }
         }
@@ -91,7 +92,7 @@ impl Universe {
                 let live_neighbours = self.live_neighbour_count(row, col);
 
                 let next_cell = match (this_cell, live_neighbours) {
-                    (Cell::Alive, x) if x <= 2 => Cell::Dead,
+                    (Cell::Alive, x) if x < 2 => Cell::Dead,
                     (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
                     (Cell::Alive, x) if x > 3 => Cell::Dead,
                     (Cell::Dead, 3) => Cell::Alive,
@@ -101,6 +102,8 @@ impl Universe {
                 next[ix] = next_cell;
             }
         }
+
+        self.cells = next;
     }
 
     // for now, render to a string
@@ -125,5 +128,20 @@ impl Display for Universe {
             writeln!(f)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::*;
+
+    #[test]
+    fn iterate_succeeds() {
+        // arrange
+        let mut universe = Universe::new();
+
+        // act & assert
+        universe.tick();
     }
 }
