@@ -1,3 +1,3 @@
 #!/bin/bash
 
-wasm-pack build
+wasm-pack build --release

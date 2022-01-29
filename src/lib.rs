@@ -168,7 +168,8 @@ impl Universe {
         }
 
         //self.cells = next;
-        self.cells.copy_from_slice(&self.flip);
+        //self.cells.copy_from_slice(&self.flip);
+        std::mem::swap(&mut self.cells, &mut self.flip);
     }
 
     // for now, render to a string

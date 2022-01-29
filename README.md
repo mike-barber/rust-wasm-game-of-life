@@ -15,7 +15,15 @@
   </h3>
 
   <sub>Built with 🦀🕸 by <a href="https://rustwasm.github.io/">The Rust and WebAssembly Working Group</a></sub>
+
 </div>
+
+## Additional notes (mike)
+
+These are useful
+- [WABT project](https://github.com/WebAssembly/wabt), installed via `apt`, including `wasm-objdump` and `wasm2wat`
+- [wasm-nm](https://github.com/fitzgen/wasm-nm), installed via `cargo install wasm-nm` for compiled object names (exports, etc.)
+- [WASM plugin](https://marketplace.visualstudio.com/items?itemName=dtsvet.vscode-wasm) for VS Code (allows right-click disassembly)
 
 ## About
 
@@ -67,3 +75,4 @@ wasm-pack publish
   for logging panic messages to the developer console.
 * [`wee_alloc`](https://github.com/rustwasm/wee_alloc), an allocator optimized
   for small code size.
+
