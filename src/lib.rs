@@ -184,7 +184,7 @@ impl Universe {
     // of course.
     pub fn tick(&mut self) {
         // start timer
-        let _timer = ScopeTimer::new("Universe::tick");
+        //let _timer = ScopeTimer::new("Universe::tick");
 
         // take flip buffer out of self to decouple it for mutability
         let mut flip = self.flip.take().unwrap();
