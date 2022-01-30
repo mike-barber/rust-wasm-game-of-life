@@ -59,7 +59,7 @@ pub struct Universe {
     width: u32,
     height: u32,
     cells: Vec<Cell>,
-    flip: Vec<Cell>,
+    flip: Option<Vec<Cell>>,
 }
 
 #[wasm_bindgen]
@@ -76,8 +76,7 @@ impl Universe {
         log!("Creating Universe with dimensions {} x {}", width, height);
 
         let cells = (0..width * height).map(|_i| Cell::random()).collect();
-
-        let flip = vec![Cell::Dead; (width * height) as usize];
+        let flip = Some(vec![Cell::Dead; (width * height) as usize]);
 
         Universe {
             width,
@@ -97,13 +96,13 @@ impl Universe {
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
         self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
-        self.flip = vec![Cell::Dead; (self.width * self.height) as usize];
+        self.flip = Some(vec![Cell::Dead; (self.width * self.height) as usize]);
     }
 
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
         self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
-        self.flip = vec![Cell::Dead; (self.width * self.height) as usize];
+        self.flip = Some(vec![Cell::Dead; (self.width * self.height) as usize]);
     }
 
     pub fn reset_random(&mut self) {
@@ -127,7 +126,7 @@ impl Universe {
         self.cells[idx].flip();
     }
 
-    fn live_neighbour_count(&self, row: u32, col: u32) -> u8 {
+    fn live_neighbour_count_edge(&self, row: u32, col: u32) -> u8 {
         let mut count = 0;
         for drow in [self.height - 1, 0, 1] {
             for dcol in [self.width - 1, 0, 1] {
@@ -143,32 +142,95 @@ impl Universe {
         count
     }
 
+    fn live_neighbour_count_centre(&self, row_context: [&[Cell]; 3], col: u32) -> u8 {
+        let col = col as usize;
+
+        let [r0, r1, r2] = row_context;
+
+        let top = r0[col - 1] as u8 + r0[col] as u8 + r0[col + 1] as u8;
+        let mid = r1[col - 1] as u8 + r1[col + 1] as u8;
+        let bot = r2[col - 1] as u8 + r2[col] as u8 + r2[col + 1] as u8;
+
+        top + mid + bot
+    }
+
+    fn live_neighbour_count_row_context(&self, row: u32) -> [&[Cell]; 3] {
+        let width = self.width as usize;
+        let row = row as usize;
+
+        let s1 = row * width;
+        let s0 = s1 - width;
+        let s2 = s1 + width;
+        let rows = [
+            &self.cells[s0..(s0 + width)],
+            &self.cells[s1..(s1 + width)],
+            &self.cells[s2..(s2 + width)],
+        ];
+        rows
+    }
+
+    fn next_cell(this_cell: Cell, live_neighbours: u8) -> Cell {
+        match (this_cell, live_neighbours) {
+            (Cell::Alive, x) if x < 2 => Cell::Dead,
+            (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+            (Cell::Alive, x) if x > 3 => Cell::Dead,
+            (Cell::Dead, 3) => Cell::Alive,
+            _ => this_cell,
+        }
+    }
+
+    // This approach is more complicated, but reduces the time for each 
+    // tick from about 16ms to 2-3ms. It could be optimised further, 
+    // of course.
     pub fn tick(&mut self) {
         // start timer
         let _timer = ScopeTimer::new("Universe::tick");
 
-        for row in 0..self.height {
-            for col in 0..self.width {
+        // take flip buffer out of self to decouple it for mutability
+        let mut flip = self.flip.take().unwrap();
+
+        // top and bottom edge
+        let r0 = 0;
+        let rh = self.height - 1;
+        for col in 0..self.width {
+            let ix0 = self.get_index(r0, col);
+            let ixh = self.get_index(rh, col);
+
+            let l0 = self.live_neighbour_count_edge(r0, col);
+            let lh = self.live_neighbour_count_edge(rh, col);
+
+            flip[ix0] = Self::next_cell(self.cells[ix0], l0);
+            flip[ixh] = Self::next_cell(self.cells[ixh], lh);
+        }
+
+        // left and right edge
+        let c0 = 0;
+        let cw = self.width - 1;
+        for row in 1..(self.height - 1) {
+            let ix0 = self.get_index(row, c0);
+            let ixw = self.get_index(row, cw);
+
+            let l0 = self.live_neighbour_count_edge(row, c0);
+            let lw = self.live_neighbour_count_edge(row, cw);
+
+            flip[ix0] = Self::next_cell(self.cells[ix0], l0);
+            flip[ixw] = Self::next_cell(self.cells[ixw], lw);
+        }
+
+        // centre section (more efficiently)
+        for row in 1..(self.height - 1) {
+            let row_context = self.live_neighbour_count_row_context(row);
+            for col in 1..(self.width - 1) {
                 let ix = self.get_index(row, col);
+                let lc = self.live_neighbour_count_centre(row_context, col);
 
-                let this_cell = self.cells[ix];
-                let live_neighbours = self.live_neighbour_count(row, col);
-
-                let next_cell = match (this_cell, live_neighbours) {
-                    (Cell::Alive, x) if x < 2 => Cell::Dead,
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-                    (Cell::Alive, x) if x > 3 => Cell::Dead,
-                    (Cell::Dead, 3) => Cell::Alive,
-                    _ => this_cell,
-                };
-
-                self.flip[ix] = next_cell;
+                flip[ix] = Self::next_cell(self.cells[ix], lc);
             }
         }
 
-        //self.cells = next;
-        //self.cells.copy_from_slice(&self.flip);
-        std::mem::swap(&mut self.cells, &mut self.flip);
+        // swap buffers and return flip to the structure
+        std::mem::swap(&mut self.cells, &mut flip);
+        self.flip = Some(flip);
     }
 
     // for now, render to a string
