@@ -1,8 +1,7 @@
 mod utils;
 
-use std::{fmt::Display, mem::swap};
+use std::fmt::Display;
 
-use js_sys::Math::random;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -71,8 +70,8 @@ impl Universe {
         utils::set_panic_hook();
 
         // create the universe
-        let width = 128;
-        let height = 128;
+        let width = 256;
+        let height = 256;
 
         log!("Creating Universe with dimensions {} x {}", width, height);
 
@@ -145,8 +144,8 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
-        // TODO: flip buffers would be more efficient potentially
-        //let mut next = self.cells.clone();
+        // start timer
+        let _timer = ScopeTimer::new("Universe::tick");
 
         for row in 0..self.height {
             for col in 0..self.width {
@@ -209,5 +208,22 @@ impl Display for Universe {
             writeln!(f)?;
         }
         Ok(())
+    }
+}
+
+pub struct ScopeTimer<'a> {
+    name: &'a str,
+}
+
+impl<'a> ScopeTimer<'a> {
+    pub fn new(name: &'a str) -> ScopeTimer<'a> {
+        web_sys::console::time_with_label(name);
+        ScopeTimer { name }
+    }
+}
+
+impl<'a> Drop for ScopeTimer<'a> {
+    fn drop(&mut self) {
+        web_sys::console::time_end_with_label(self.name);
     }
 }
