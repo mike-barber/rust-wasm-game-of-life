@@ -66,22 +66,39 @@ const drawCells = () => {
     const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
 
     ctx.beginPath();
+
+    // draw live cells
+    ctx.fillStyle = LIVE_COLOR;
     for (let row = 0; row < height; ++row) {
         for (let col = 0; col < width; ++col) {
             const idx = getIndex(row, col);
-
-            ctx.fillStyle = cells[idx] === Cell.Dead
-                ? DEAD_COLOR
-                : LIVE_COLOR;
-
-            ctx.fillRect(
-                col * (CELL_SIZE + 1) + 1,
-                row * (CELL_SIZE + 1) + 1,
-                CELL_SIZE,
-                CELL_SIZE
-            )
+            if (cells[idx] === Cell.Alive) {
+                ctx.fillRect(
+                    col * (CELL_SIZE + 1) + 1,
+                    row * (CELL_SIZE + 1) + 1,
+                    CELL_SIZE,
+                    CELL_SIZE
+                )
+            }
         }
     }
+
+    // draw dead cells
+    ctx.fillStyle = DEAD_COLOR;
+    for (let row = 0; row < height; ++row) {
+        for (let col = 0; col < width; ++col) {
+            const idx = getIndex(row, col);
+            if (cells[idx] === Cell.Dead) {
+                ctx.fillRect(
+                    col * (CELL_SIZE + 1) + 1,
+                    row * (CELL_SIZE + 1) + 1,
+                    CELL_SIZE,
+                    CELL_SIZE
+                )
+            }
+        }
+    }
+
     ctx.stroke();
 }
 
