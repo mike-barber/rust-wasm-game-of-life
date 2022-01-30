@@ -23,6 +23,8 @@ const ctx = canvas.getContext("2d");
 let animationId = null;
 
 const renderLoop = () => {
+    fps.render();
+
     //debugger; -- useful for a breakpoint
     universe.tick();
 
@@ -146,6 +148,51 @@ randomButton.addEventListener("click", _ => {
     drawGrid();
     drawCells();
 });
+
+
+// performance measurement
+const fps = new class {
+    constructor() {
+        this.fps = document.getElementById("fps");
+        this.frames = [];
+        this.lastFrameTimeStamp = performance.now();
+    }
+
+    render() {
+        const now = performance.now();
+        const delta = now - this.lastFrameTimeStamp;
+        this.lastFrameTimeStamp = now;
+
+        const lastFps = 1000 / delta;
+
+        // save the last 100 timings
+        this.frames.push(lastFps);
+        if (this.frames.length > 100) {
+            this.frames.shift();
+        }
+
+        // max, min, mean
+        let min = Infinity;
+        let max = -Infinity;
+        let sum = 0;
+        for (let i = 0; i < this.frames.length; ++i) {
+            let curr = this.frames[i];
+            sum += curr;
+            min = Math.min(min, curr);
+            max = Math.max(max, curr);
+        }
+        let mean = sum / this.frames.length;
+
+        // render
+        this.fps.textContent = `
+Frames per second:
+    latest = ${Math.round(lastFps)}
+    avg    = ${Math.round(mean)}
+    min    = ${Math.round(min)}
+    max    = ${Math.round(max)}
+`.trim();
+    }
+}
 
 
 // start
