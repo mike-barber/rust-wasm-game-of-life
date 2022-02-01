@@ -137,7 +137,7 @@ function animateScene() {
 
     gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
 
-    window.requestAnimationFrame(function(currentTime) {
+    window.requestAnimationFrame(function (currentTime) {
         let deltaAngle = ((currentTime - previousTime) / 1000.0) * degreesPerSeconds;
         currentAngle = (currentAngle + deltaAngle) % 360;
         previousTime = currentTime;
