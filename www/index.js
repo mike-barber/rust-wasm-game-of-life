@@ -1,6 +1,6 @@
 //import * as wasm from "hello-wasm-pack";
 //import * as wasm from "wasm-game-of-life";
-import { Universe, Cell, wasm_draw_grid, wasm_draw_cells } from "wasm-game-of-life";
+import { Universe, Cell, wasm_draw_grid, wasm_draw_cells, RenderSettings } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
 const CELL_SIZE = 5;
@@ -18,6 +18,12 @@ canvas.width = CELL_SIZE * width;
 
 const ctx = canvas.getContext("2d");
 
+const wasmRenderSettings = RenderSettings.new(
+    CELL_SIZE, 
+    LIVE_COLOR,
+    DEAD_COLOR,
+    GRID_COLOR
+    );
 
 
 let animationId = null;
@@ -34,12 +40,12 @@ const renderLoop = () => {
 
 const drawBoth = () => {
     // draw using JS
-    drawCells();
-    drawGrid();
+    //drawCells();
+    //drawGrid();
 
     // draw using WASM
-    //wasm_draw_cells(ctx, CELL_SIZE, universe);
-    //wasm_draw_grid(ctx, CELL_SIZE, universe);
+    wasm_draw_cells(ctx, wasmRenderSettings, universe);
+    wasm_draw_grid(ctx, wasmRenderSettings, universe);
 }
 
 
@@ -71,7 +77,7 @@ const getIndex = (row, column) => {
 }
 
 const drawCells = () => {
-    const cellsPtr = universe.cells();
+    const cellsPtr = universe.cells_ptr();
     const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
 
     ctx.beginPath();

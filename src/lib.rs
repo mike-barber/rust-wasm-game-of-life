@@ -102,7 +102,7 @@ impl Universe {
         self.cells.iter_mut().for_each(|v| *v = Cell::Dead);
     }
 
-    pub fn cells(&self) -> *const Cell {
+    pub fn cells_ptr(&self) -> *const Cell {
         self.cells.as_ptr()
     }
 
@@ -231,7 +231,7 @@ impl Universe {
 // Note: NOT part of the exposed interface to bindgen, as we only need these
 // for testing purposes.
 impl Universe {
-    pub fn get_cells(&self) -> &[Cell] {
+    pub fn cells(&self) -> &[Cell] {
         &self.cells
     }
 

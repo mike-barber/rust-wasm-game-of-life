@@ -2,27 +2,47 @@ use crate::{Cell, Universe};
 use wasm_bindgen::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
-const GRID_COLOR: &str = "#CCCCCC";
-const DEAD_COLOR: &str = "#FFFFFF";
-const LIVE_COLOR: &str = "#000000";
-
-
+#[wasm_bindgen]
+pub struct RenderSettings {
+    cell_size: f64,
+    live_color: JsValue,
+    dead_color: JsValue,
+    grid_color: JsValue,
+}
 
 #[wasm_bindgen]
-pub fn wasm_draw_cells(ctx: &CanvasRenderingContext2d, cell_size: f64, universe: &Universe) {
+impl RenderSettings {
+    pub fn new(
+        cell_size: f64,
+        live_color: JsValue,
+        dead_color: JsValue,
+        grid_color: JsValue,
+    ) -> RenderSettings {
+        RenderSettings {
+            cell_size,
+            live_color,
+            dead_color,
+            grid_color,
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn wasm_draw_cells(ctx: &CanvasRenderingContext2d, settings: &RenderSettings, universe: &Universe) {
     ctx.begin_path();
 
-    let live_color = JsValue::from_str(LIVE_COLOR);
-    let dead_color = JsValue::from_str(DEAD_COLOR);
+    let cell_size = settings.cell_size;
+    let live_color = &settings.live_color;
+    let dead_color = &settings.dead_color;
 
-    let cells = universe.get_cells();
+    let cells = universe.cells();
 
     // TODO: this would probably be faster and more efficient with a zip
     // over rows/cols, cells; calculating index and dereferencing is
     // inefficient.
 
     // draw live cells
-    ctx.set_fill_style(&live_color);
+    ctx.set_fill_style(live_color);
     for row in 0..universe.height {
         for col in 0..universe.width {
             let idx = universe.get_index(row, col);
@@ -38,7 +58,7 @@ pub fn wasm_draw_cells(ctx: &CanvasRenderingContext2d, cell_size: f64, universe:
     }
 
     // draw dead cells
-    ctx.set_fill_style(&dead_color);
+    ctx.set_fill_style(dead_color);
     for row in 0..universe.height {
         for col in 0..universe.width {
             let idx = universe.get_index(row, col);
@@ -57,8 +77,9 @@ pub fn wasm_draw_cells(ctx: &CanvasRenderingContext2d, cell_size: f64, universe:
 }
 
 #[wasm_bindgen]
-pub fn wasm_draw_grid(ctx: &CanvasRenderingContext2d, cell_size: f64, universe: &Universe) {
-    let grid_color = JsValue::from_str(GRID_COLOR);
+pub fn wasm_draw_grid(ctx: &CanvasRenderingContext2d, settings: &RenderSettings, universe: &Universe) {
+    let grid_color = &settings.grid_color;
+    let cell_size = settings.cell_size;
     let height = universe.height() as f64;
     let width = universe.width() as f64;
 
