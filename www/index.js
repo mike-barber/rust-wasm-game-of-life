@@ -3,10 +3,10 @@
 import { Universe, Cell, wasm_draw_grid, wasm_draw_cells } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
-const CELL_SIZE = 4;
-const GRID_COLOR = "#CCCCCC";
-const DEAD_COLOR = "#FFFFFF";
-const LIVE_COLOR = "#000000";
+const CELL_SIZE = 5;
+const GRID_COLOR = "#004000";
+const DEAD_COLOR = "#001000";
+const LIVE_COLOR = "#00FF00";
 
 const universe = Universe.new();
 const width = universe.width();
@@ -34,11 +34,11 @@ const renderLoop = () => {
 
 const drawBoth = () => {
     // draw using JS
-    //drawCells();
-    //drawGrid();
+    drawCells();
+    drawGrid();
 
     // draw using WASM
-    wasm_draw_cells(ctx, CELL_SIZE, universe);
+    //wasm_draw_cells(ctx, CELL_SIZE, universe);
     //wasm_draw_grid(ctx, CELL_SIZE, universe);
 }
 

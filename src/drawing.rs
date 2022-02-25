@@ -6,6 +6,8 @@ const GRID_COLOR: &str = "#CCCCCC";
 const DEAD_COLOR: &str = "#FFFFFF";
 const LIVE_COLOR: &str = "#000000";
 
+
+
 #[wasm_bindgen]
 pub fn wasm_draw_cells(ctx: &CanvasRenderingContext2d, cell_size: f64, universe: &Universe) {
     ctx.begin_path();
