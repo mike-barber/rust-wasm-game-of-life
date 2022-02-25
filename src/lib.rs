@@ -1,4 +1,5 @@
 mod utils;
+pub mod drawing;
 
 use std::fmt::Display;
 
@@ -9,18 +10,6 @@ use wasm_bindgen::prelude::*;
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-// #[wasm_bindgen]
-// extern {
-//     // imported FROM JS so we can interact with it
-//     fn alert(s: &str);
-// }
-
-// #[wasm_bindgen]
-// pub fn greet(who: &str) {
-//     // exported TO JS so this function can be called
-//     alert(&format!("Hello, {}, from Rust!", who));
-// }
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
 macro_rules! log {
@@ -179,8 +168,8 @@ impl Universe {
         }
     }
 
-    // This approach is more complicated, but reduces the time for each 
-    // tick from about 16ms to 2-3ms. It could be optimised further, 
+    // This approach is more complicated, but reduces the time for each
+    // tick from about 16ms to 2-3ms. It could be optimised further,
     // of course.
     pub fn tick(&mut self) {
         // start timer
@@ -289,3 +278,4 @@ impl<'a> Drop for ScopeTimer<'a> {
         web_sys::console::time_end_with_label(self.name);
     }
 }
+

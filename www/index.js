@@ -1,9 +1,9 @@
 //import * as wasm from "hello-wasm-pack";
 //import * as wasm from "wasm-game-of-life";
-import { Universe, Cell } from "wasm-game-of-life";
+import { Universe, Cell, wasm_draw_grid, wasm_draw_cells } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
-const CELL_SIZE = 5;
+const CELL_SIZE = 4;
 const GRID_COLOR = "#CCCCCC";
 const DEAD_COLOR = "#FFFFFF";
 const LIVE_COLOR = "#000000";
@@ -13,8 +13,8 @@ const width = universe.width();
 const height = universe.height();
 
 const canvas = document.getElementById("game-of-life-canvas");
-canvas.height = (CELL_SIZE + 1) * height + 1;
-canvas.width = (CELL_SIZE + 1) * width + 1;
+canvas.height = CELL_SIZE * height;
+canvas.width = CELL_SIZE * width;
 
 const ctx = canvas.getContext("2d");
 
@@ -27,10 +27,19 @@ const renderLoop = () => {
 
     //debugger; -- useful for a breakpoint
     universe.tick();
-
-    drawGrid();
-    drawCells();
+    drawBoth();
+        
     animationId = requestAnimationFrame(renderLoop);
+}
+
+const drawBoth = () => {
+    // draw using JS
+    //drawCells();
+    //drawGrid();
+
+    // draw using WASM
+    wasm_draw_cells(ctx, CELL_SIZE, universe);
+    //wasm_draw_grid(ctx, CELL_SIZE, universe);
 }
 
 
@@ -39,19 +48,19 @@ const drawGrid = () => {
     ctx.strokeStyle = GRID_COLOR;
 
     // vertical lines
+    let yc = CELL_SIZE * height;
     for (let i = 0; i <= width; ++i) {
-        let xc = i * (CELL_SIZE + 1) + 1;
-        let yi = i * (CELL_SIZE + 1) * height + 1;
-        ctx.moveTo(xc, 0);
-        ctx.lineTo(xc, yi);
+        let xi = i * CELL_SIZE;
+        ctx.moveTo(xi, 0);
+        ctx.lineTo(xi, yc);
     }
 
     // horizontal lines
+    let xc = CELL_SIZE * width;
     for (let i = 0; i <= height; ++i) {
-        let xi = (CELL_SIZE + 1) * width + 1;
-        let yc = i * (CELL_SIZE + 1) + 1;
-        ctx.moveTo(0, yc);
-        ctx.lineTo(xi, yc);
+        let yi = i * CELL_SIZE;
+        ctx.moveTo(0, yi);
+        ctx.lineTo(xc, yi);
     }
 
     ctx.stroke();
@@ -74,8 +83,8 @@ const drawCells = () => {
             const idx = getIndex(row, col);
             if (cells[idx] === Cell.Alive) {
                 ctx.fillRect(
-                    col * (CELL_SIZE + 1) + 1,
-                    row * (CELL_SIZE + 1) + 1,
+                    col * CELL_SIZE,
+                    row * CELL_SIZE,
                     CELL_SIZE,
                     CELL_SIZE
                 )
@@ -90,8 +99,8 @@ const drawCells = () => {
             const idx = getIndex(row, col);
             if (cells[idx] === Cell.Dead) {
                 ctx.fillRect(
-                    col * (CELL_SIZE + 1) + 1,
-                    row * (CELL_SIZE + 1) + 1,
+                    col * CELL_SIZE,
+                    row * CELL_SIZE,
                     CELL_SIZE,
                     CELL_SIZE
                 )
@@ -146,24 +155,21 @@ canvas.addEventListener("click", event => {
     const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
     const canvasTop = (event.clientY - boundingRect.top) * scaleY;
 
-    const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
-    const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
+    const row = Math.min(Math.floor(canvasTop / CELL_SIZE), height);
+    const col = Math.min(Math.floor(canvasLeft / CELL_SIZE), width);
 
     universe.flip_cell(row,col);
-    drawGrid();
-    drawCells();
+    drawBoth();
 });
 
 blankButton.addEventListener("click", _ => {
     universe.reset_zero();
-    drawGrid();
-    drawCells();
+    drawBoth();
 });
 
 randomButton.addEventListener("click", _ => {
     universe.reset_random();
-    drawGrid();
-    drawCells();
+    drawBoth();
 });
 
 
@@ -213,6 +219,5 @@ Frames per second:
 
 
 // start
-drawGrid();
-drawCells();
+drawBoth();
 play();
