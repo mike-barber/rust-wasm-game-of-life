@@ -1,5 +1,5 @@
-mod utils;
 pub mod drawing;
+mod utils;
 
 use std::fmt::Display;
 
@@ -172,9 +172,6 @@ impl Universe {
     // tick from about 16ms to 2-3ms. It could be optimised further,
     // of course.
     pub fn tick(&mut self) {
-        // start timer
-        //let _timer = ScopeTimer::new("Universe::tick");
-
         // take flip buffer out of self to decouple it for mutability
         let mut flip = self.flip.take().unwrap();
 
@@ -228,8 +225,7 @@ impl Universe {
     }
 }
 
-// Note: NOT part of the exposed interface to bindgen, as we only need these
-// for testing purposes.
+// Note: NOT part of the exposed interface to bindgen; for internal use
 impl Universe {
     pub fn cells(&self) -> &[Cell] {
         &self.cells
@@ -240,6 +236,11 @@ impl Universe {
             let ix = self.get_index(r, c);
             self.cells[ix] = Cell::Alive;
         }
+    }
+
+    // iterator over (row,column) addresses 
+    pub fn addresses_iter(&self) -> impl Iterator<Item = (u32, u32)> + '_ {
+        (0..self.height).flat_map(move |r| (0..self.width).map(move |c| (r, c)))
     }
 }
 
@@ -278,4 +279,3 @@ impl<'a> Drop for ScopeTimer<'a> {
         web_sys::console::time_end_with_label(self.name);
     }
 }
-

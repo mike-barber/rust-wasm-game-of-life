@@ -28,48 +28,40 @@ impl RenderSettings {
 }
 
 #[wasm_bindgen]
-pub fn wasm_draw_cells(ctx: &CanvasRenderingContext2d, settings: &RenderSettings, universe: &Universe) {
+pub fn wasm_draw_cells(
+    ctx: &CanvasRenderingContext2d,
+    settings: &RenderSettings,
+    universe: &Universe,
+) {
     ctx.begin_path();
 
     let cell_size = settings.cell_size;
     let live_color = &settings.live_color;
     let dead_color = &settings.dead_color;
 
-    let cells = universe.cells();
-
-    // TODO: this would probably be faster and more efficient with a zip
-    // over rows/cols, cells; calculating index and dereferencing is
-    // inefficient.
-
     // draw live cells
     ctx.set_fill_style(live_color);
-    for row in 0..universe.height {
-        for col in 0..universe.width {
-            let idx = universe.get_index(row, col);
-            if cells[idx] == Cell::Alive {
-                ctx.fill_rect(
-                    col as f64 * cell_size,
-                    row as f64 * cell_size,
-                    cell_size,
-                    cell_size,
-                );
-            }
+    for (&cell, (row, col)) in universe.cells().iter().zip(universe.addresses_iter()) {
+        if cell == Cell::Alive {
+            ctx.fill_rect(
+                col as f64 * cell_size,
+                row as f64 * cell_size,
+                cell_size,
+                cell_size,
+            );
         }
     }
 
     // draw dead cells
     ctx.set_fill_style(dead_color);
-    for row in 0..universe.height {
-        for col in 0..universe.width {
-            let idx = universe.get_index(row, col);
-            if cells[idx] == Cell::Dead {
-                ctx.fill_rect(
-                    col as f64 * cell_size,
-                    row as f64 * cell_size,
-                    cell_size,
-                    cell_size,
-                );
-            }
+    for (&cell, (row, col)) in universe.cells().iter().zip(universe.addresses_iter()) {
+        if cell == Cell::Dead {
+            ctx.fill_rect(
+                col as f64 * cell_size,
+                row as f64 * cell_size,
+                cell_size,
+                cell_size,
+            );
         }
     }
 
@@ -77,7 +69,11 @@ pub fn wasm_draw_cells(ctx: &CanvasRenderingContext2d, settings: &RenderSettings
 }
 
 #[wasm_bindgen]
-pub fn wasm_draw_grid(ctx: &CanvasRenderingContext2d, settings: &RenderSettings, universe: &Universe) {
+pub fn wasm_draw_grid(
+    ctx: &CanvasRenderingContext2d,
+    settings: &RenderSettings,
+    universe: &Universe,
+) {
     let grid_color = &settings.grid_color;
     let cell_size = settings.cell_size;
     let height = universe.height() as f64;

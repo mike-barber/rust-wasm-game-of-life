@@ -8,11 +8,6 @@ use wasm_game_of_life::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
-// #[wasm_bindgen_test]
-// fn pass() {
-//     assert_eq!(1 + 1, 2);
-// }
-
 #[cfg(test)]
 mod tests {
 
@@ -54,6 +49,22 @@ mod tests {
         input_universe.tick();
 
         // assert
-        assert_eq!(&input_universe.get_cells(), &expected_universe.get_cells());
+        assert_eq!(&input_universe.cells(), &expected_universe.cells());
+    }
+
+    #[wasm_bindgen_test]
+    fn addresses_iterator_test() {
+        // arrange
+        let universe = Universe::new();
+        
+        // act + assert        
+        let mut iter = universe.addresses_iter();
+        for r in 0..universe.height() {
+            for c in 0..universe.width() {
+                let (ri, ci) = iter.next().unwrap();
+                assert_eq!(r, ri);
+                assert_eq!(c, ci);
+            }
+        }
     }
 }
