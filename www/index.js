@@ -229,15 +229,13 @@ const fps = new class {
         }
         let mean = sum / this.frames.length;
 
-        const round = v => Math.round(v*10)/10
-
         // render
         this.fps.textContent = `
 Frames per second:
-    latest = ${round(lastFps)}
-    avg    = ${round(mean)}
-    min    = ${round(min)}
-    max    = ${round(max)}
+    latest = ${lastFps.toFixed(1)}
+    avg    = ${mean.toFixed(2)}
+    min    = ${min.toFixed(1)}
+    max    = ${max.toFixed(1)}
 `.trim();
     }
 }

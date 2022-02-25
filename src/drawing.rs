@@ -41,28 +41,34 @@ pub fn wasm_draw_cells(
 
     // draw live cells
     ctx.set_fill_style(live_color);
-    for (&cell, (row, col)) in universe.cells().iter().zip(universe.addresses_iter()) {
-        if cell == Cell::Alive {
-            ctx.fill_rect(
-                col as f64 * cell_size,
-                row as f64 * cell_size,
-                cell_size,
-                cell_size,
-            );
-        }
+    for (_, (row, col)) in universe
+        .cells()
+        .iter()
+        .zip(universe.addresses_iter())
+        .filter(|(&cell, _)| cell == Cell::Alive)
+    {
+        ctx.fill_rect(
+            col as f64 * cell_size,
+            row as f64 * cell_size,
+            cell_size,
+            cell_size,
+        );
     }
 
     // draw dead cells
     ctx.set_fill_style(dead_color);
-    for (&cell, (row, col)) in universe.cells().iter().zip(universe.addresses_iter()) {
-        if cell == Cell::Dead {
-            ctx.fill_rect(
-                col as f64 * cell_size,
-                row as f64 * cell_size,
-                cell_size,
-                cell_size,
-            );
-        }
+    for (_, (row, col)) in universe
+        .cells()
+        .iter()
+        .zip(universe.addresses_iter())
+        .filter(|(&cell, _)| cell == Cell::Dead)
+    {
+        ctx.fill_rect(
+            col as f64 * cell_size,
+            row as f64 * cell_size,
+            cell_size,
+            cell_size,
+        );
     }
 
     ctx.stroke();
