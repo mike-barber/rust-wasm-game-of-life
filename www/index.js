@@ -18,6 +18,8 @@ canvas.width = CELL_SIZE * width;
 
 const ctx = canvas.getContext("2d");
 
+let wasmDrawingMode = false;
+
 const wasmRenderSettings = RenderSettings.new(
     CELL_SIZE, 
     LIVE_COLOR,
@@ -39,13 +41,15 @@ const renderLoop = () => {
 }
 
 const drawBoth = () => {
-    // draw using JS
-    //drawCells();
-    //drawGrid();
-
-    // draw using WASM
-    wasm_draw_cells(ctx, wasmRenderSettings, universe);
-    wasm_draw_grid(ctx, wasmRenderSettings, universe);
+    if (wasmDrawingMode) {
+        // draw using WASM
+        wasm_draw_cells(ctx, wasmRenderSettings, universe);
+        wasm_draw_grid(ctx, wasmRenderSettings, universe);
+    } else {
+        // draw using JS
+        drawCells();
+        drawGrid();
+    }
 }
 
 
@@ -124,6 +128,7 @@ const drawCells = () => {
 const playPauseButton = document.getElementById("btn-play-pause");
 const blankButton = document.getElementById("btn-blank");
 const randomButton = document.getElementById("btn-random");
+const drawingButton = document.getElementById("btn-drawing");
 
 const isPaused = () => {
     return animationId === null;
@@ -178,6 +183,18 @@ randomButton.addEventListener("click", _ => {
     drawBoth();
 });
 
+drawingButton.addEventListener("click", _ => {
+    wasmDrawingMode = !wasmDrawingMode;
+    echoDrawingMethod();
+})
+
+
+const echoDrawingMethod = () => {
+    let mode = wasmDrawingMode 
+        ? "WASM"
+        : "JavaScript";
+    document.getElementById("method").textContent = "drawing method: " + mode;
+}
 
 // performance measurement
 const fps = new class {
@@ -192,7 +209,7 @@ const fps = new class {
         const delta = now - this.lastFrameTimeStamp;
         this.lastFrameTimeStamp = now;
 
-        const lastFps = 1000 / delta;
+        const lastFps = 1000.0 / delta;
 
         // save the last 100 timings
         this.frames.push(lastFps);
@@ -212,13 +229,15 @@ const fps = new class {
         }
         let mean = sum / this.frames.length;
 
+        const round = v => Math.round(v*10)/10
+
         // render
         this.fps.textContent = `
 Frames per second:
-    latest = ${Math.round(lastFps)}
-    avg    = ${Math.round(mean)}
-    min    = ${Math.round(min)}
-    max    = ${Math.round(max)}
+    latest = ${round(lastFps)}
+    avg    = ${round(mean)}
+    min    = ${round(min)}
+    max    = ${round(max)}
 `.trim();
     }
 }
@@ -227,3 +246,4 @@ Frames per second:
 // start
 drawBoth();
 play();
+echoDrawingMethod();
