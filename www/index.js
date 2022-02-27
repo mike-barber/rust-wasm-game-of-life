@@ -247,10 +247,10 @@ const fps = new class {
         // render
         this.fps.textContent = `
 Frames per second:
-    latest = ${lastFps.toFixed(1)}
-    avg    = ${mean.toFixed(2)}
-    min    = ${min.toFixed(1)}
-    max    = ${max.toFixed(1)}
+latest = ${lastFps.toFixed(1)}
+avg    = ${mean.toFixed(2)}
+min    = ${min.toFixed(1)}
+max    = ${max.toFixed(1)}
 `.trim();
     }
 }

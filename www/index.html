@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Hello wasm-pack!</title>
+  <title>Conway's Game of Life in Wasm</title>
   <style>
     body {
       position: absolute;
@@ -15,30 +15,54 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      background: rgb(00, 20, 00);
+      color: rgb(00,255,00);
+      font-family: monospace;
     }
+
     #fps {
       white-space: pre;
+    }
+
+    button {
+      background-color: darkgreen;
+      color: rgb(00,255,00);
+      border-style: solid;
+      border-color: green;
       font-family: monospace;
+    }
+
+    td {
+      background-color: rgb(00,30,00);
     }
   </style>
 </head>
 
 <body>
   <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
-  <div>
-    Controls:
-    <button id="btn-play-pause"></button>
-    <button id="btn-blank">blank</button>
-    <button id="btn-random">random</button>
-    <br/>
-    Drawing mode:
-    <button id="btn-drawing-wasm-pixels">wasm pixels</button>
-    <button id="btn-drawing-wasm">wasm canvas</button>
-    <button id="btn-drawing-js">javascript canvas</button>
-  </div>
-  <div id="fps"></div>
-  <canvas id="game-of-life-canvas"><canvas />
-    <script src="./bootstrap.js"></script>
+  <h1>Conway's Game of Life in Wasm</h1>
+  <table>
+    <tr>
+      <td>
+        <div>
+          Controls:<br/>
+          <button id="btn-play-pause"></button>
+          <button id="btn-blank">blank</button>
+          <button id="btn-random">random</button>
+          <br />
+          Drawing mode:<br/>
+          <button id="btn-drawing-wasm-pixels">wasm pixels</button><br/>
+          <button id="btn-drawing-wasm">wasm canvas</button><br/>
+          <button id="btn-drawing-js">javascript canvas</button>
+        </div>
+        <div id="fps"></div>
+      </td>
+      <td>
+        <canvas id="game-of-life-canvas"><canvas />
+      </td>
+    </tr>
+  </table>
+  <script src="./bootstrap.js"></script>
 </body>
 
 </html>
