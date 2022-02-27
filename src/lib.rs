@@ -150,12 +150,11 @@ impl Universe {
         let s1 = row * width;
         let s0 = s1 - width;
         let s2 = s1 + width;
-        let rows = [
+        [
             &self.cells[s0..(s0 + width)],
             &self.cells[s1..(s1 + width)],
             &self.cells[s2..(s2 + width)],
-        ];
-        rows
+        ]
     }
 
     fn next_cell(this_cell: Cell, live_neighbours: u8) -> Cell {
@@ -238,7 +237,7 @@ impl Universe {
         }
     }
 
-    // iterator over (row,column) addresses 
+    // iterator over (row,column) addresses
     pub fn addresses_iter(&self) -> impl Iterator<Item = (u32, u32)> + '_ {
         (0..self.height).flat_map(move |r| (0..self.width).map(move |c| (r, c)))
     }

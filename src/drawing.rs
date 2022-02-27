@@ -86,7 +86,7 @@ pub fn wasm_draw_grid(
     let width = universe.width() as f64;
 
     ctx.begin_path();
-    ctx.set_stroke_style(&grid_color);
+    ctx.set_stroke_style(grid_color);
 
     // vertical lines
     let y_end = cell_size * height;
