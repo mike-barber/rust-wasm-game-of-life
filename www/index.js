@@ -1,6 +1,6 @@
 //import * as wasm from "hello-wasm-pack";
 //import * as wasm from "wasm-game-of-life";
-import { Universe, Cell, wasm_draw_grid, wasm_draw_cells, RenderSettings } from "wasm-game-of-life";
+import { Universe, Cell, wasm_draw_grid, wasm_draw_cells, RenderSettings, RenderPixels } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
 const CELL_SIZE = 5;
@@ -18,15 +18,23 @@ canvas.width = CELL_SIZE * width;
 
 const ctx = canvas.getContext("2d");
 
-let wasmDrawingMode = false;
+// drawing mode options
+const drawModeWasm = "wasm";
+const drawModeWasmPixels = "wasm_pixels";
+const drawModeJavaScript = "javascript";
+let wasmDrawingMode = drawModeWasmPixels;
+
 
 const wasmRenderSettings = RenderSettings.new(
-    CELL_SIZE, 
+    CELL_SIZE,
     LIVE_COLOR,
     DEAD_COLOR,
     GRID_COLOR
-    );
+);
 
+const wasmRenderPixels = RenderPixels.new_from(
+    universe,
+    CELL_SIZE);
 
 let animationId = null;
 
@@ -36,17 +44,21 @@ const renderLoop = () => {
     //debugger; -- useful for a breakpoint
     universe.tick();
     drawBoth();
-        
+
     animationId = requestAnimationFrame(renderLoop);
 }
 
 const drawBoth = () => {
-    if (wasmDrawingMode) {
-        // draw using WASM
+    if (wasmDrawingMode === drawModeWasmPixels) {
+        // draw using WASM and pixels
+        wasmRenderPixels.wasm_draw_pixels(ctx, universe);
+        wasm_draw_grid(ctx, wasmRenderSettings, universe);
+    } else if (wasmDrawingMode === drawModeWasm) {
+        // draw using WASM and canvas
         wasm_draw_cells(ctx, wasmRenderSettings, universe);
         wasm_draw_grid(ctx, wasmRenderSettings, universe);
-    } else {
-        // draw using JS
+    } else if (wasmDrawingMode === drawModeJavaScript) {
+        // draw using JS and canvas
         drawCells();
         drawGrid();
     }
@@ -128,7 +140,9 @@ const drawCells = () => {
 const playPauseButton = document.getElementById("btn-play-pause");
 const blankButton = document.getElementById("btn-blank");
 const randomButton = document.getElementById("btn-random");
-const drawingButton = document.getElementById("btn-drawing");
+const drawingButtonWasmPixels = document.getElementById("btn-drawing-wasm-pixels");
+const drawingButtonWasm = document.getElementById("btn-drawing-wasm");
+const drawingButtonJs = document.getElementById("btn-drawing-js");
 
 const isPaused = () => {
     return animationId === null;
@@ -169,7 +183,7 @@ canvas.addEventListener("click", event => {
     const row = Math.min(Math.floor(canvasTop / CELL_SIZE), height);
     const col = Math.min(Math.floor(canvasLeft / CELL_SIZE), width);
 
-    universe.flip_cell(row,col);
+    universe.flip_cell(row, col);
     drawBoth();
 });
 
@@ -183,18 +197,19 @@ randomButton.addEventListener("click", _ => {
     drawBoth();
 });
 
-drawingButton.addEventListener("click", _ => {
-    wasmDrawingMode = !wasmDrawingMode;
-    echoDrawingMethod();
+
+drawingButtonWasmPixels.addEventListener("click", _ => {
+    wasmDrawingMode = drawModeWasmPixels;
 })
 
+drawingButtonWasm.addEventListener("click", _ => {
+    wasmDrawingMode = drawModeWasm;
+})
 
-const echoDrawingMethod = () => {
-    let mode = wasmDrawingMode 
-        ? "WASM"
-        : "JavaScript";
-    document.getElementById("method").textContent = "drawing method: " + mode;
-}
+drawingButtonJs.addEventListener("click", _ => {
+    wasmDrawingMode = drawModeJavaScript;
+})
+
 
 // performance measurement
 const fps = new class {
@@ -244,4 +259,3 @@ Frames per second:
 // start
 drawBoth();
 play();
-echoDrawingMethod();

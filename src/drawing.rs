@@ -106,3 +106,7 @@ pub fn wasm_draw_grid(
 
     ctx.stroke();
 }
+
+
+
+

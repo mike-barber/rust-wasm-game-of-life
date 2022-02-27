@@ -1,4 +1,5 @@
 pub mod drawing;
+pub mod drawing_bitmap;
 mod utils;
 
 use std::fmt::Display;
