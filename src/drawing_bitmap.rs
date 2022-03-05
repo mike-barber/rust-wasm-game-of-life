@@ -88,7 +88,7 @@ impl RenderPixels {
 // reverse byte order: A, B, G, R
 // alpha needs to be 0xFF so it's not transparent
 fn parse_color(color_str: &str) -> Result<u32, String> {
-    let s = color_str.trim_start_matches("#");
+    let s = color_str.trim_start_matches('#');
     let n = u32::from_str_radix(s, 16)
         .map_err(|e| format!("Could not parse color {s} due to error {e}"))?;
 

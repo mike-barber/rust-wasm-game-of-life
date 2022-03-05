@@ -1,6 +1,6 @@
 //import * as wasm from "hello-wasm-pack";
 //import * as wasm from "wasm-game-of-life";
-import { Universe, Cell, wasm_draw_grid, wasm_draw_cells, RenderSettings, RenderPixels } from "wasm-game-of-life";
+import { Universe, Cell, wasm_draw_grid, wasm_draw_cells, RenderSettings, RenderPixels, initialize } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
 const CELL_SIZE = 5;
@@ -22,8 +22,7 @@ const ctx = canvas.getContext("2d");
 const drawModeWasm = "wasm";
 const drawModeWasmPixels = "wasm_pixels";
 const drawModeJavaScript = "javascript";
-let wasmDrawingMode = drawModeWasmPixels;
-
+let wasmDrawingMode = drawModeWasmPixels; // default
 
 const wasmRenderSettings = RenderSettings.new(
     CELL_SIZE,
@@ -146,24 +145,24 @@ const drawCells = () => {
  * Interactions
  */
 
-const playPauseButton = document.getElementById("btn-play-pause");
-const blankButton = document.getElementById("btn-blank");
-const randomButton = document.getElementById("btn-random");
-const drawingButtonWasmPixels = document.getElementById("btn-drawing-wasm-pixels");
-const drawingButtonWasm = document.getElementById("btn-drawing-wasm");
-const drawingButtonJs = document.getElementById("btn-drawing-js");
+const btnPlayPause = document.getElementById("btn-play-pause");
+const btnBlank = document.getElementById("btn-blank");
+const btnRandom = document.getElementById("btn-random");
+const btnDrawWasmPixels = document.getElementById("btn-drawing-wasm-pixels");
+const btnDrawWasm = document.getElementById("btn-drawing-wasm");
+const btnDrawJs = document.getElementById("btn-drawing-js");
 
 const isPaused = () => {
     return animationId === null;
 };
 
 const play = () => {
-    playPauseButton.textContent = "||";
+    btnPlayPause.textContent = "||";
     renderLoop();
 };
 
 const pause = () => {
-    playPauseButton.textContent = "|>";
+    btnPlayPause.textContent = "|>";
     cancelAnimationFrame(animationId);
     animationId = null;
 };
@@ -171,7 +170,7 @@ const pause = () => {
 
 
 // hook up the event handler for the button
-playPauseButton.addEventListener("click", _ => {
+btnPlayPause.addEventListener("click", _ => {
     if (isPaused()) {
         play();
     } else {
@@ -196,32 +195,32 @@ canvas.addEventListener("click", event => {
     drawBoth();
 });
 
-blankButton.addEventListener("click", _ => {
+btnBlank.addEventListener("click", _ => {
     universe.reset_zero();
     drawBoth();
 });
 
-randomButton.addEventListener("click", _ => {
+btnRandom.addEventListener("click", _ => {
     universe.reset_random();
     drawBoth();
 });
 
 const highlightDrawModeButton = () => {
-    drawingButtonWasmPixels.className = '';
-    drawingButtonWasm.className = '';
-    drawingButtonJs.className = '';
+    btnDrawWasmPixels.className = '';
+    btnDrawWasm.className = '';
+    btnDrawJs.className = '';
     
     const highlight = 'highlight';
 
     switch (wasmDrawingMode) {
         case drawModeWasmPixels:
-            drawingButtonWasmPixels.className = highlight;
+            btnDrawWasmPixels.className = highlight;
             break;
         case drawModeWasm:
-            drawingButtonWasm.className = highlight;
+            btnDrawWasm.className = highlight;
             break;
         case drawModeJavaScript: 
-            drawingButtonJs.className = highlight;
+            btnDrawJs.className = highlight;
             break;
 
         default:
@@ -229,23 +228,25 @@ const highlightDrawModeButton = () => {
     }
 }
 
-drawingButtonWasmPixels.addEventListener("click", _ => {
+btnDrawWasmPixels.addEventListener("click", _ => {
     wasmDrawingMode = drawModeWasmPixels;
     highlightDrawModeButton();
 })
 
-drawingButtonWasm.addEventListener("click", _ => {
+btnDrawWasm.addEventListener("click", _ => {
     wasmDrawingMode = drawModeWasm;
     highlightDrawModeButton();
 })
 
-drawingButtonJs.addEventListener("click", _ => {
+btnDrawJs.addEventListener("click", _ => {
     wasmDrawingMode = drawModeJavaScript;
     highlightDrawModeButton();
 })
 
 
-// performance measurement
+// performance measurement -- we could probably write 
+// this more neatly in WASM too, but this will do for
+// now (as per tutorial)
 const fps = new class {
     constructor() {
         this.fps = document.getElementById("fps");
@@ -290,6 +291,7 @@ max    = ${max.toFixed(1)}
 
 
 // start
+initialize();
 highlightDrawModeButton();
 drawBoth();
 play();

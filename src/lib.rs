@@ -20,6 +20,11 @@ macro_rules! log {
 }
 
 #[wasm_bindgen]
+pub fn initialize() {
+    utils::set_panic_hook();
+}
+
+#[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
@@ -55,10 +60,6 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
-        // Configure panic hook (not sure this is the right place, since
-        // it's quite a global thing. It'll do for now.
-        utils::set_panic_hook();
-
         // create the universe
         let width = 256;
         let height = 256;
