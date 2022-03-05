@@ -16,8 +16,12 @@
       align-items: center;
       justify-content: center;
       background: rgb(00, 20, 00);
-      color: rgb(00,255,00);
+      color: rgb(00, 255, 00);
       font-family: monospace;
+    }
+
+    #bold {
+      font-weight: bold;
     }
 
     #fps {
@@ -26,14 +30,23 @@
 
     button {
       background-color: darkgreen;
-      color: rgb(00,255,00);
+      color: rgb(00, 255, 00);
       border-style: solid;
       border-color: green;
       font-family: monospace;
     }
 
+    button.highlight {
+      background-color: rgb(00, 255, 00);
+      color: darkgreen;
+      border-style: solid;
+      border-color: green;
+      font-family: monospace;
+      color: darkgreen;
+    }
+
     td {
-      background-color: rgb(00,30,00);
+      background-color: rgb(00, 30, 00);
     }
   </style>
 </head>
@@ -44,18 +57,27 @@
   <table>
     <tr>
       <td>
-        <div>
-          Controls:<br/>
+        <p>
+          Drawing mode<br />
+          <button id="btn-drawing-wasm-pixels">wasm pixels</button><br />
+          <button id="btn-drawing-wasm">wasm canvas</button><br />
+          <button id="btn-drawing-js">javascript canvas</button>
+        </p>
+        <p>
+          Frames per second
+        <div id="fps">...</div>
+        </p>
+        <p>
+          Pause the animation<br />
+          and click on the grid<br />
+          to toggle cells
+        </p>
+        <p>
+          Controls<br />
           <button id="btn-play-pause"></button>
           <button id="btn-blank">blank</button>
           <button id="btn-random">random</button>
-          <br />
-          Drawing mode:<br/>
-          <button id="btn-drawing-wasm-pixels">wasm pixels</button><br/>
-          <button id="btn-drawing-wasm">wasm canvas</button><br/>
-          <button id="btn-drawing-js">javascript canvas</button>
-        </div>
-        <div id="fps"></div>
+        </p>
       </td>
       <td>
         <canvas id="game-of-life-canvas"><canvas />

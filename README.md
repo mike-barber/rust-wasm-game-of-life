@@ -16,9 +16,9 @@ We're broadly following the [Rust WASM tutorial](https://rustwasm.github.io/book
 ## Build, test, run
 
 ```
-./build.sh
-./test.sh
-./run.sh
+./build
+./test
+./run
 ```
 
 # Notes

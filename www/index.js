@@ -34,7 +34,9 @@ const wasmRenderSettings = RenderSettings.new(
 
 const wasmRenderPixels = RenderPixels.new_from(
     universe,
-    CELL_SIZE);
+    CELL_SIZE,
+    LIVE_COLOR,
+    DEAD_COLOR);
 
 let animationId = null;
 
@@ -49,18 +51,25 @@ const renderLoop = () => {
 }
 
 const drawBoth = () => {
-    if (wasmDrawingMode === drawModeWasmPixels) {
-        // draw using WASM and pixels
-        wasmRenderPixels.wasm_draw_pixels(ctx, universe);
-        wasm_draw_grid(ctx, wasmRenderSettings, universe);
-    } else if (wasmDrawingMode === drawModeWasm) {
-        // draw using WASM and canvas
-        wasm_draw_cells(ctx, wasmRenderSettings, universe);
-        wasm_draw_grid(ctx, wasmRenderSettings, universe);
-    } else if (wasmDrawingMode === drawModeJavaScript) {
-        // draw using JS and canvas
-        drawCells();
-        drawGrid();
+    switch (wasmDrawingMode) {
+        case drawModeWasmPixels:
+            // draw using WASM and pixels
+            wasmRenderPixels.wasm_draw_pixels(ctx, universe);
+            wasm_draw_grid(ctx, wasmRenderSettings, universe);
+            break;
+        case drawModeWasm:
+            // draw using WASM and canvas
+            wasm_draw_cells(ctx, wasmRenderSettings, universe);
+            wasm_draw_grid(ctx, wasmRenderSettings, universe);
+            break;
+        case drawModeJavaScript: 
+            // draw using JS and canvas
+            drawCells();
+            drawGrid();
+            break;
+
+        default:
+            break;
     }
 }
 
@@ -149,12 +158,12 @@ const isPaused = () => {
 };
 
 const play = () => {
-    playPauseButton.textContent = "⏸";
+    playPauseButton.textContent = "||";
     renderLoop();
 };
 
 const pause = () => {
-    playPauseButton.textContent = "▶";
+    playPauseButton.textContent = "|>";
     cancelAnimationFrame(animationId);
     animationId = null;
 };
@@ -197,17 +206,42 @@ randomButton.addEventListener("click", _ => {
     drawBoth();
 });
 
+const highlightDrawModeButton = () => {
+    drawingButtonWasmPixels.className = '';
+    drawingButtonWasm.className = '';
+    drawingButtonJs.className = '';
+    
+    const highlight = 'highlight';
+
+    switch (wasmDrawingMode) {
+        case drawModeWasmPixels:
+            drawingButtonWasmPixels.className = highlight;
+            break;
+        case drawModeWasm:
+            drawingButtonWasm.className = highlight;
+            break;
+        case drawModeJavaScript: 
+            drawingButtonJs.className = highlight;
+            break;
+
+        default:
+            break;
+    }
+}
 
 drawingButtonWasmPixels.addEventListener("click", _ => {
     wasmDrawingMode = drawModeWasmPixels;
+    highlightDrawModeButton();
 })
 
 drawingButtonWasm.addEventListener("click", _ => {
     wasmDrawingMode = drawModeWasm;
+    highlightDrawModeButton();
 })
 
 drawingButtonJs.addEventListener("click", _ => {
     wasmDrawingMode = drawModeJavaScript;
+    highlightDrawModeButton();
 })
 
 
@@ -246,7 +280,6 @@ const fps = new class {
 
         // render
         this.fps.textContent = `
-Frames per second:
 latest = ${lastFps.toFixed(1)}
 avg    = ${mean.toFixed(2)}
 min    = ${min.toFixed(1)}
@@ -257,5 +290,6 @@ max    = ${max.toFixed(1)}
 
 
 // start
+highlightDrawModeButton();
 drawBoth();
 play();
