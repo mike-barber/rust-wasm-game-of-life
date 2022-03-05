@@ -59,22 +59,27 @@ pub struct Universe {
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new() -> Universe {
-        // create the universe
-        let width = 256;
-        let height = 256;
+    pub fn new(width: i32, height: i32) -> Result<Universe, String> {
+        // validation
+        if width <= 0 || height <= 0 {
+            return Err(format!(
+                "Positive dimensions required. Got {width} {height}"
+            ));
+        }
 
+        // create the universe
         log!("Creating Universe with dimensions {} x {}", width, height);
 
-        let cells = (0..width * height).map(|_i| Cell::random()).collect();
-        let flip = Some(vec![Cell::Dead; (width * height) as usize]);
+        let length = (width * height) as usize;
+        let cells = vec![Cell::Dead; length];
+        let flip = Some(vec![Cell::Dead; length]);
 
-        Universe {
-            width,
-            height,
+        Ok(Universe {
+            width: width as u32,
+            height: height as u32,
             cells,
             flip,
-        }
+        })
     }
 
     pub fn width(&self) -> u32 {
@@ -82,18 +87,6 @@ impl Universe {
     }
     pub fn height(&self) -> u32 {
         self.height
-    }
-
-    pub fn set_width(&mut self, width: u32) {
-        self.width = width;
-        self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
-        self.flip = Some(vec![Cell::Dead; (self.width * self.height) as usize]);
-    }
-
-    pub fn set_height(&mut self, height: u32) {
-        self.height = height;
-        self.cells = vec![Cell::Dead; (self.width * self.height) as usize];
-        self.flip = Some(vec![Cell::Dead; (self.width * self.height) as usize]);
     }
 
     pub fn reset_random(&mut self) {

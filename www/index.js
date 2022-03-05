@@ -3,18 +3,18 @@
 import { Universe, Cell, wasm_draw_grid, wasm_draw_cells, RenderSettings, RenderPixels, initialize } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
-const CELL_SIZE = 5;
 const GRID_COLOR = "#004000";
 const DEAD_COLOR = "#001000";
 const LIVE_COLOR = "#00FF00";
 
-const universe = Universe.new();
-const width = universe.width();
-const height = universe.height();
+const CELL_SIZE = 4;
+const WIDTH = 256;
+const HEIGHT = 256;
+const universe = Universe.new(WIDTH, HEIGHT);
 
 const canvas = document.getElementById("game-of-life-canvas");
-canvas.height = CELL_SIZE * height;
-canvas.width = CELL_SIZE * width;
+canvas.height = CELL_SIZE * HEIGHT;
+canvas.width = CELL_SIZE * WIDTH;
 
 const ctx = canvas.getContext("2d");
 
@@ -78,16 +78,16 @@ const drawGrid = () => {
     ctx.strokeStyle = GRID_COLOR;
 
     // vertical lines
-    let yc = CELL_SIZE * height;
-    for (let i = 0; i <= width; ++i) {
+    let yc = CELL_SIZE * HEIGHT;
+    for (let i = 0; i <= WIDTH; ++i) {
         let xi = i * CELL_SIZE;
         ctx.moveTo(xi, 0);
         ctx.lineTo(xi, yc);
     }
 
     // horizontal lines
-    let xc = CELL_SIZE * width;
-    for (let i = 0; i <= height; ++i) {
+    let xc = CELL_SIZE * WIDTH;
+    for (let i = 0; i <= HEIGHT; ++i) {
         let yi = i * CELL_SIZE;
         ctx.moveTo(0, yi);
         ctx.lineTo(xc, yi);
@@ -97,19 +97,19 @@ const drawGrid = () => {
 }
 
 const getIndex = (row, column) => {
-    return row * width + column;
+    return row * WIDTH + column;
 }
 
 const drawCells = () => {
     const cellsPtr = universe.cells_ptr();
-    const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+    const cells = new Uint8Array(memory.buffer, cellsPtr, WIDTH * HEIGHT);
 
     ctx.beginPath();
 
     // draw live cells
     ctx.fillStyle = LIVE_COLOR;
-    for (let row = 0; row < height; ++row) {
-        for (let col = 0; col < width; ++col) {
+    for (let row = 0; row < HEIGHT; ++row) {
+        for (let col = 0; col < WIDTH; ++col) {
             const idx = getIndex(row, col);
             if (cells[idx] === Cell.Alive) {
                 ctx.fillRect(
@@ -124,8 +124,8 @@ const drawCells = () => {
 
     // draw dead cells
     ctx.fillStyle = DEAD_COLOR;
-    for (let row = 0; row < height; ++row) {
-        for (let col = 0; col < width; ++col) {
+    for (let row = 0; row < HEIGHT; ++row) {
+        for (let col = 0; col < WIDTH; ++col) {
             const idx = getIndex(row, col);
             if (cells[idx] === Cell.Dead) {
                 ctx.fillRect(
@@ -188,8 +188,8 @@ canvas.addEventListener("click", event => {
     const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
     const canvasTop = (event.clientY - boundingRect.top) * scaleY;
 
-    const row = Math.min(Math.floor(canvasTop / CELL_SIZE), height);
-    const col = Math.min(Math.floor(canvasLeft / CELL_SIZE), width);
+    const row = Math.min(Math.floor(canvasTop / CELL_SIZE), HEIGHT);
+    const col = Math.min(Math.floor(canvasLeft / CELL_SIZE), WIDTH);
 
     universe.flip_cell(row, col);
     drawBoth();
@@ -293,5 +293,6 @@ max    = ${max.toFixed(1)}
 // start
 initialize();
 highlightDrawModeButton();
+universe.reset_random();
 drawBoth();
 play();
