@@ -1,4 +1,5 @@
 use core::slice;
+use std::iter;
 
 use wasm_bindgen::{prelude::*, Clamped};
 use web_sys::{CanvasRenderingContext2d, ImageData};
@@ -45,24 +46,32 @@ impl RenderPixels {
         ctx: &CanvasRenderingContext2d,
         universe: &Universe,
     ) -> Result<(), JsValue> {
-        self.pixel_buffer.fill(self.dead_color);
-
-        // draw live cells
+        let cells = universe.cells.as_slice();
         let cell_size = self.cell_size as usize;
-        for (_, (row, col)) in universe
-            .cells()
-            .iter()
-            .zip(universe.addresses_iter())
-            .filter(|(&cell, _)| cell == Cell::Alive)
-        {
-            // draw rectangle (scan lines)
-            let start_row = row as usize * cell_size;
-            for r in 0..cell_size {
-                let start = (start_row + r) * self.width + col as usize * cell_size;
-                let end = start + cell_size;
-                self.pixel_buffer[start..end].fill(self.live_color);
+
+        iter::zip(
+            cells.chunks_exact(universe.width as usize),
+            self.pixel_buffer
+                .chunks_exact_mut(self.width * self.cell_size as usize),
+        )
+        .for_each(|(ur, pr)| {
+            // draw first row
+            for i in 0..ur.len() {
+                let color = match ur[i] {
+                    Cell::Alive => self.live_color,
+                    Cell::Dead => self.dead_color,
+                };
+                let x_start = i * cell_size;
+                for x in 0..cell_size {
+                    pr[x_start + x] = color;
+                }
             }
-        }
+
+            // repeat first row N-1 times
+            for i in 1..cell_size {
+                pr.copy_within(0..self.width, i * self.width);
+            }
+        });
 
         // reinterpret [u32] as [u8]
         let bytes = unsafe {
