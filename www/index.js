@@ -8,8 +8,8 @@ const DEAD_COLOR = "#001000";
 const LIVE_COLOR = "#00FF00";
 
 const CELL_SIZE = 4;
-const WIDTH = 1024;
-const HEIGHT = 1024;
+const WIDTH = 256;
+const HEIGHT = 256;
 const universe = Universe.new(WIDTH, HEIGHT);
 
 const canvas = document.getElementById("game-of-life-canvas");
