@@ -23,6 +23,7 @@ const drawModeWasm = "wasm";
 const drawModeWasmPixels = "wasm_pixels";
 const drawModeJavaScript = "javascript";
 let wasmDrawingMode = drawModeWasmPixels; // default
+let drawGridEnabled = true;
 
 const wasmRenderSettings = RenderSettings.new(
     CELL_SIZE,
@@ -54,17 +55,17 @@ const drawBoth = () => {
         case drawModeWasmPixels:
             // draw using WASM and pixels
             wasmRenderPixels.wasm_draw_pixels(ctx, universe);
-            wasm_draw_grid(ctx, wasmRenderSettings, universe);
+            if (drawGridEnabled) wasm_draw_grid(ctx, wasmRenderSettings, universe);
             break;
         case drawModeWasm:
             // draw using WASM and canvas
             wasm_draw_cells(ctx, wasmRenderSettings, universe);
-            wasm_draw_grid(ctx, wasmRenderSettings, universe);
+            if (drawGridEnabled) wasm_draw_grid(ctx, wasmRenderSettings, universe);
             break;
         case drawModeJavaScript: 
             // draw using JS and canvas
             drawCells();
-            drawGrid();
+            if (drawGridEnabled) drawGrid();
             break;
 
         default:
